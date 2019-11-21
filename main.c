@@ -4,8 +4,12 @@
 #define MAX 300
 #include "libtp.h"
 
+/* Esse algoritmo utiliza Longest Common Subsequence (LCS) para obter um novo código a partir
+  de dois códigos distintos */
 
-int max(int a, int b); 
+/* Essa função retorna o maior valor para a matriz numerica 
+  caso não haja linha em comum na sequencia anterior */
+
 int max(int a, int b) 
 { 
     if (a>b){
@@ -16,36 +20,45 @@ int max(int a, int b)
     }
 } 
 
-//--------- ALOCAR O TAMANHO DOS ARQUIVOS-----------//
 
-int** aloc_int_lcs(int i, int j)
+/* Aloca dinamicamente o tamanho da matriz numerica de LCS a 
+  partir da sequencia em comum entre os arquivos analisados,
+  recebendo como parametros o número de linhas de cada arquivo.*/
+
+int** aloc_int_lcs(int num_ln1, int num_ln2)
   {
-    int** L;
-    int aux1,aux2;
-    L = (int**)calloc(i,sizeof(int*));
-        for(int x = 0; x < i; x++)
+    int**mat_aloc;
+    mat_aloc = (int**)calloc(num_ln1,sizeof(int*));
+        for(int aux1 = 0; aux1 < num_ln1; aux1++)
       {
-        L[x] = (int*)calloc(j,sizeof(int));
+        mat_aloc[aux1] = (int*)calloc(num_ln2,sizeof(int));
       }
-    if (L == NULL)
+    if (mat_aloc == NULL)
       {
         printf("Houve um erro\n");
       }
   
-  return L;
+  return mat_aloc;
 }
 
 
+/* A função FREE_ALOC_CHAR vai liberar todo espaço armazenado pela matriz gerada
+  a partir do LCS, recebendo como parametros a matriz gerada e sua 
+  quantidade de linhas */
 
-//--------------------  FREE ----------------------//
-void free_aloc(char** aloc_char1, int tam_int1)
+void free_aloc_char(char** free_char, int tam_char)
   {
-    for(int aux3 = 0; aux3 < tam_int1; aux3++)
+    for(int aux2 = 0; aux2 < tam_char; aux2++)
       {
-        free(aloc_char1[aux3]);
+        free(free_char[aux2]);
       }
-    free(aloc_char1);   
+    free(free_char);   
   }
+
+
+/* A função FREE_ALOC_INT vai liberar todo espaço armazenado pela matriz numerica
+  que é usada para atribuir a maior sequencia em comum, recebendo como parametros 
+  a matriz numerica e sua quantidade de linhas */
 
 void free_aloc_int(int** free_int, int tam_int)
   {
@@ -56,31 +69,39 @@ void free_aloc_int(int** free_int, int tam_int)
     free(free_int);   
   }
 
-//-------------- ABRIR ARQUIVO -------------------//
-void abrirarquivo(FILE *arq, int* tamanho, char** arquivo)
+
+/* Essa função recebe como parametros o arquivo analisado, numero de linhas já computado
+  e uma variavel CHAR** ARCHIVE na qual será copiada cada linha do arquivo para uma 
+  posição dessa matriz */
+
+void open_archive(FILE *arc, int* size_arc, char** archive)
   {
-    if (arq == NULL)
+    if (arc == NULL)
       {
         printf("!!!!ERROR!!!!\n");
         exit;
       }
     setbuf(stdin, NULL);
-    char ln_arc[MAX];
-    int aux1;
+    char aux_arc[MAX];
+    int aux4;
     int ln = 0;
-    while (fgets(ln_arc, MAX, arq))
+    while (fgets(aux_arc, MAX, arc))
       {
-        aux1 = strlen(ln_arc);
-        arquivo[ln] = (char*)calloc(aux1+1,sizeof(char));
-        strcpy(arquivo[ln], ln_arc);
+        aux4 = strlen(aux_arc);
+        archive[ln] = (char*)calloc(aux4+1,sizeof(char));
+        strcpy(archive[ln], aux_arc);
         ln++;    
       }
-    *tamanho = ln;
+    *size_arc = ln;
  
   }
 
 
-void contlinha(FILE *arquivo, int* aux1)
+/* Recebe como parametros uma variavel auxiliar e o arquivo, e tem a função
+  de computar o número de linhas de cada arquivo para que ele possa ser alocado
+  dinamicamente e passado para outras funções como a OPEN_ARCHIVE */
+
+void cont_ln(FILE *arquivo, int* aux5)
   {
     int ln = 0;
        if (arquivo == NULL)
@@ -96,62 +117,70 @@ void contlinha(FILE *arquivo, int* aux1)
         ln++;    
       }
       rewind(arquivo);
-      *aux1 = ln;
+      *aux5 = ln;
 
   }
 
 
-//--------------- LCS NUMERICO -------------------//
+/* Função que gera a matriz numerica base para criar a maior subsequencia em comum,
+  ela recebe de parametros os arquivos já formatados em uma posição do vetor em ARC_1 e ARC_2
+  além do numero de linhas de cada arquivo e uma variavel auxiliar que vai receber o valor final
+  da quantidade de subsequencias em comum dos arquivos. */
 
-int** LCS(char** vetor1, char** vetor2, int p, int k, int* ind_final)
+int** lcs_number(char** arc_1, char** arc_2, int tam_ln_1, int tam_ln_2, int* ind_final)
   {
-    int** L = aloc_int_lcs(p+1,k+1);
-    for (int i=0; i< p+1; i++) 
+    int** mat_int = aloc_int_lcs(tam_ln_1 + 1, tam_ln_2 + 1);
+    for (int i = 0; i < tam_ln_1 + 1; i++) 
       { 
-        for (int j=0; j< k+1; j++) 
+        for (int j = 0; j < tam_ln_2 + 1; j++) 
           { 
             if (i == 0 || j == 0)
               {
-                L[i][j] = 0; 
+                mat_int[i][j] = 0; 
               }
-            else if (strcmp(vetor1[i-1],vetor2[j-1]) == 0)
+            else if (strcmp(arc_1[i-1], arc_2[j-1]) == 0)
               { 
-                L[i][j] = L[i-1][j-1] + 1; 
+                mat_int[i][j] = mat_int[i-1][j-1] + 1; 
               }
             else
               {
-                L[i][j] = max(L[i-1][j], L[i][j-1]); 
+                mat_int[i][j] = max(mat_int[i-1][j], mat_int[i][j-1]); 
               }   
             }
         }
-        *ind_final = L[p][k];
-    return L;
+        *ind_final = mat_int[tam_ln_1][tam_ln_2];
+    
+    return mat_int;
   }
 
 
-//--------------- LCS FORMATADO -------------------//
+/* A partir da matriz numerica, utilizamos a LCS_FORMAT para formatar todas as linhas em comum
+  a partir do valor de cada posição definido na matriz numerica, ao final disso tem-se a matriz
+  de lcs onde cada linha dessa matriz é uma linha de código comum em ambos os arquivos em sua 
+  respectiva posição de modo que não comprometa o funcionamento de modo que respeite a ordem de 
+  precedência da sua posição */
 
-  char** lcsformatado(int** L, int p, int k, char** vetor1, char** vetor2,int aux4)
+  char** lcs_format(int** mat_int, int ln_1, int ln_2, char** arc_1, char** arc_2,int aux7)
     {
-    int index = aux4; 
+    int index = aux7; 
     char** lcs;
-    int i = p; 
-    int j = k; 
-    int aux;
+    int i = ln_1; 
+    int j = ln_2; 
+    int aux8;
 
-    lcs = (char**)calloc(p,sizeof(char*));
+    lcs = (char**)calloc(ln_1,sizeof(char*));
     while (i > 0 && j > 0)
     { 
-      if (strcmp(vetor1[i-1],vetor2[j-1]) == 0)
+      if (strcmp(arc_1[i-1],arc_2[j-1]) == 0)
         { 
-          aux = strlen(vetor1[i-1]);
-          lcs[index-1] = (char*)calloc(aux+1,sizeof(char));
-          strcpy(lcs[index-1],vetor1[i-1]);
+          aux8 = strlen(arc_1[i-1]);
+          lcs[index-1] = (char*)calloc(aux8+1,sizeof(char));
+          strcpy(lcs[index-1],arc_1[i-1]);
           i--; 
           j--; 
           index--;  
         }
-      else if (L[i-1][j] > L[i][j-1])
+      else if (mat_int[i-1][j] > mat_int[i][j-1])
         {
           i--; 
         }
@@ -163,6 +192,7 @@ int** LCS(char** vetor1, char** vetor2, int p, int k, int* ind_final)
     return lcs;
  }
 
+
 //--------------- FUNÇÃO PRINCIPAL -------------------//
 
 int main(int argc, char* argv[ ])
@@ -171,42 +201,35 @@ int main(int argc, char* argv[ ])
     char** string2;
     char** matriz_char;
     int** matriz_int;
-    int aux1,aux2;
-    int tamanho1 = 0, tamanho2 = 0, index = 0;
-    int arc_1 , arc_2;
+    ln.aux_ln1 = 0 , ln.aux_ln2 = 0, ln.index = 0; //declaração do struct
+    int ln_1 , ln_2;                              
 
     FILE *arq1;
     FILE *arq2;
     arq1 = fopen(argv[1],"r");
     arq2 = fopen(argv[2],"r");
-    contlinha(arq1, &arc_1);
-    contlinha(arq2, &arc_2);
+    cont_ln(arq1, &ln_1);  //conta o numero de linhas do arquivo 1
+    cont_ln(arq2, &ln_2);  //conta o numero de linhas do arquivo 2
 
-    string1 = (char**)calloc(arc_1,sizeof(char*));//corrigir pois esta estatico;
-    abrirarquivo(arq1, &tamanho1,string1);
-    string2 = (char**)calloc(arc_2,sizeof(char*));//corrigir pois esta estatico;
-    abrirarquivo(arq2, &tamanho2,string2);
-    matriz_int = LCS(string1,string2,tamanho1,tamanho2,&index);
-    matriz_char = lcsformatado(matriz_int,tamanho1,tamanho2,string1,string2,index);
+    string1 = (char**)calloc(ln_1,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do primeiro arquivo
+    open_archive(arq1, &ln.aux_ln1,string1);  //apos arquivos abertos, coleto novamente numero de linhas e conteudo do mesmo
+    string2 = (char**)calloc(ln_2,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do segundo arquivo
+    open_archive(arq2, &ln.aux_ln2,string2);  //apos arquivos abertos, coleto novamente numero de linhas e conteudo do mesmo
+    matriz_int = lcs_number(string1, string2, ln.aux_ln1, ln.aux_ln2, &ln.index);  //cria a matriz numerica de lcs
+    matriz_char = lcs_format(matriz_int, ln.aux_ln1, ln.aux_ln2, string1, string2, ln.index);  //cria a matriz de char lcs
     
-    for(int i=0; i < index; i++)
+    for(int i=0; i < ln.index; i++)
       {
-        printf("%s",matriz_char[i]);
+        printf("%s", matriz_char[i]);  //apos gerado a matriz de char lcs, imprimimos a resposta
       }
-
+    /*Fecha os arquivos*/
     fclose(arq1);
     fclose(arq2);
 
-    free_aloc(string1,tamanho1);
-    free_aloc(string2,tamanho2);
-    free_aloc_int(matriz_int,tamanho1);
-
-
-
-
-  printf("\n");
-  fprintf(stderr,"João me da dois pontos.\n");    
-
+    /* Libera todo o espaço alocado dinamicamente*/
+    free_aloc_char(string1,ln.aux_ln1);
+    free_aloc_char(string2,ln.aux_ln2);
+    free_aloc_int(matriz_int,ln.aux_ln1);
 
     return 0;
   }
