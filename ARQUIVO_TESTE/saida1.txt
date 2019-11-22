@@ -1,0 +1,22 @@
+entry:
+  %chip.addr = alloca %struct.gpio_chip*, align 8
+  %offset.addr = alloca i32, align 4
+  %gpio = alloca %struct.kempld_gpio_data*, align 8
+  %pld = alloca %struct.kempld_device_data*, align 8
+  store %struct.gpio_chip* %chip, %struct.gpio_chip** %chip.addr, align 8
+  store i32 %offset, i32* %offset.addr, align 4
+  %0 = load %struct.gpio_chip*, %struct.gpio_chip** %chip.addr, align 8
+  %call = call %struct.kempld_gpio_data* @gpiochip_get_data(%struct.gpio_chip* %0)
+  store %struct.kempld_gpio_data* %call, %struct.kempld_gpio_data** %gpio, align 8
+  %1 = load %struct.kempld_gpio_data*, %struct.kempld_gpio_data** %gpio, align 8
+  %pld1 = getelementptr inbounds %struct.kempld_gpio_data, %struct.kempld_gpio_data* %1, i32 0, i32 0
+  %2 = load %struct.kempld_device_data*, %struct.kempld_device_data** %pld1, align 8
+  store %struct.kempld_device_data* %2, %struct.kempld_device_data** %pld, align 8
+  %3 = load %struct.kempld_device_data*, %struct.kempld_device_data** %pld, align 8
+  %call2 = call i32 @kempld_get_mutex(%struct.kempld_device_data* %3)
+  %4 = load %struct.kempld_device_data*, %struct.kempld_device_data** %pld, align 8
+  %5 = load i32, i32* %offset.addr, align 4
+  %6 = load i32, i32* %offset.addr, align 4
+  ret i32 0
+}
+
