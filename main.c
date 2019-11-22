@@ -166,7 +166,7 @@ int** lcs_number(char** arc_1, char** arc_2, int tam_ln_1, int tam_ln_2, int* in
     char** lcs;
     int i = ln_1; 
     int j = ln_2; 
-    int aux8;
+    int aux8,aux9;
 
     lcs = (char**)calloc(ln_1,sizeof(char*));
     while (i > 0 && j > 0)
@@ -193,6 +193,130 @@ int** lcs_number(char** arc_1, char** arc_2, int tam_ln_1, int tam_ln_2, int* in
  }
 
 
+/*Função generica para o ponto extra, fiz meu codigo padrão
+  que tinha desenvolvido antes de modularizar e alocar dinamicamente
+  todas as funções*/
+
+void pontoextra(FILE* arq1, FILE* arq2)
+  {
+    rewind(arq1);
+    rewind(arq2);
+    if(arq1 == NULL)
+      {
+        printf("!!!!ERROR!!!!\n");
+        exit;
+      }
+    if (arq2 == NULL)
+      {
+        printf("!!ERROR!!\n");
+        exit;
+      }
+    char palavra[MAX];
+    char vetor[MAX][MAX];
+    char palavra2[MAX];
+    char vetor2[MAX][MAX];
+    int p = 0,k = 0;
+
+    setbuf(stdin, NULL);
+
+    while (fgets(palavra, MAX, arq1))
+      {
+        strcpy(vetor[p], palavra);
+        p++;    
+      }
+    while (fgets(palavra2, MAX, arq2))
+      {
+        strcpy(vetor2[k], palavra2);
+        k++;
+      }
+    fclose(arq1);
+    fclose(arq2);
+
+    int L[p+1][k+1]; 
+
+   for (int i=0; i< p+1; i++)
+    { 
+     for (int j=0; j< k+1; j++)
+      { 
+       if (i == 0 || j == 0)
+        {
+          L[i][j] = 0; }
+       else if (strcmp(vetor[i-1],vetor2[j-1]) == 0)
+        { 
+          L[i][j] = L[i-1][j-1] + 1; 
+         }
+       else
+        {
+         L[i][j] = max(L[i-1][j], L[i][j-1]); 
+        }   
+     }
+    }
+
+    int index = L[p][k]; 
+    int index2 = L[p][k]; 
+    int i = p; 
+    int j = k; 
+    int a = p;
+    int b = k;
+    int d = p;
+    int t = k;
+    int soma = p+k;
+    int aux12 = soma;
+    char lcs_extra[soma][500];
+    char lcs[index][500];
+    while (i > 0 && j > 0)
+      { 
+        if (strcmp(vetor[i-1],vetor2[j-1]) == 0)
+          { 
+            strcpy(lcs[index-1],vetor[i-1]);
+            i--; 
+            j--; 
+            index--;  
+          }
+        else if (L[i-1][j] > L[i][j-1])
+          {
+            i--; 
+           }
+        else
+          {
+            j--;
+          } 
+   }
+
+   while(a>2 && b>2)
+    {
+      if (strcmp(lcs[index2-1],vetor[a-1]) == 0)
+        {
+          strcpy(lcs_extra[soma-1],lcs[index2-1]);
+          soma--;
+          index2--;
+          a--;
+        }
+      else
+        {
+          strcpy(lcs_extra[soma-1],vetor[a-1]);
+          soma--;
+          index2--;
+          a--;
+          strcpy(lcs_extra[soma-1],vetor2[b-1]);
+          soma--;
+          index2--;
+          b--;
+        }  
+    }
+  /*Formatei a saida para que o cabeçalho e os dois ultimos caracteres 
+    padroes de todos os arquivos apareçam*/
+   fprintf(stderr,"%s",vetor[0]);
+    fprintf(stderr,"%s",vetor[1]);
+    for (int i=0; i < aux12-4; i++)
+      {
+        fprintf(stderr,"%s",lcs_extra[i]);
+      }
+    fprintf(stderr,"%s",vetor[d-2]);
+    fprintf(stderr,"%s",vetor[d-1]);
+  }
+
+
 //--------------- FUNÇÃO PRINCIPAL -------------------//
 
 int main(int argc, char* argv[ ])
@@ -208,9 +332,9 @@ int main(int argc, char* argv[ ])
     FILE *arq2;
     arq1 = fopen(argv[1],"r");
     arq2 = fopen(argv[2],"r");
+    
     cont_ln(arq1, &ln_1);  //conta o numero de linhas do arquivo 1
     cont_ln(arq2, &ln_2);  //conta o numero de linhas do arquivo 2
-
     string1 = (char**)calloc(ln_1,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do primeiro arquivo
     open_archive(arq1, &ln.aux_ln1,string1);  //apos arquivos abertos, coleto novamente numero de linhas e conteudo do mesmo
     string2 = (char**)calloc(ln_2,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do segundo arquivo
@@ -222,6 +346,9 @@ int main(int argc, char* argv[ ])
       {
         printf("%s", matriz_char[i]);  //apos gerado a matriz de char lcs, imprimimos a resposta
       }
+
+    pontoextra(arq1,arq2); //ponto extra
+
     /*Fecha os arquivos*/
     fclose(arq1);
     fclose(arq2);
@@ -229,7 +356,7 @@ int main(int argc, char* argv[ ])
     /* Libera todo o espaço alocado dinamicamente*/
     free_aloc_char(string1,ln.aux_ln1);
     free_aloc_char(string2,ln.aux_ln2);
-    free_aloc_int(matriz_int,ln.aux_ln1);
+    free_aloc_int(matriz_int,ln.aux_ln1);    
 
     return 0;
   }
