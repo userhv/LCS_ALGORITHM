@@ -1,0 +1,17 @@
+entry:
+  %irqd.addr = alloca %struct.irq_data*, align 8
+  %gc = alloca %struct.gpio_chip*, align 8
+  %jzgc = alloca %struct.ingenic_gpio_chip*, align 8
+  store %struct.irq_data* %irqd, %struct.irq_data** %irqd.addr, align 8
+  %0 = load %struct.irq_data*, %struct.irq_data** %irqd.addr, align 8
+  %call = call %struct.gpio_chip* @irq_data_get_irq_chip_data(%struct.irq_data* %0)
+  store %struct.gpio_chip* %call, %struct.gpio_chip** %gc, align 8
+  %1 = load %struct.gpio_chip*, %struct.gpio_chip** %gc, align 8
+  %call1 = call %struct.ingenic_gpio_chip* @gpiochip_get_data(%struct.gpio_chip* %1)
+  store %struct.ingenic_gpio_chip* %call1, %struct.ingenic_gpio_chip** %jzgc, align 8
+
+
+  br label %if.end
+
+}
+
