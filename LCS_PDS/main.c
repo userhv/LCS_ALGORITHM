@@ -212,9 +212,9 @@ void pontoextra(FILE* arq1, FILE* arq2)
         exit;
       }
     char palavra[MAX];
-    char vetor[MAX][MAX];
+    char vetor[MAX][MAX];//strings do arquivo 1
     char palavra2[MAX];
-    char vetor2[MAX][MAX];
+    char vetor2[MAX][MAX]; //strings do arquivo 2
     int p = 0,k = 0;
 
     setbuf(stdin, NULL);
@@ -232,90 +232,93 @@ void pontoextra(FILE* arq1, FILE* arq2)
     fclose(arq1);
     fclose(arq2);
 
-    int L[p+1][k+1]; 
+        int L[p+1][k+1]; 
 
-   for (int i=0; i< p+1; i++)
-    { 
-     for (int j=0; j< k+1; j++)
+    for (int i=0; i< p+1; i++) 
       { 
-       if (i == 0 || j == 0)
-        {
-          L[i][j] = 0; }
-       else if (strcmp(vetor[i-1],vetor2[j-1]) == 0)
-        { 
-          L[i][j] = L[i-1][j-1] + 1; 
-         }
-       else
-        {
-         L[i][j] = max(L[i-1][j], L[i][j-1]); 
-        }   
-     }
-    }
+        for (int j=0; j< k+1; j++)
+          { 
+            if (i == 0 || j == 0)
+              {
+                L[i][j] = 0;
+              }
+            else if (strcmp(vetor[i-1],vetor2[j-1]) == 0)
+              { 
+                L[i][j] =  L[i-1][j-1] + 1; 
+              }
+            else
+              {
+                L[i][j] = max(L[i-1][j], L[i][j-1]); 
+              }   
+          }
+      }
+  /* A minha modificação do LCS foi para criar duas novas variaveis que possuem as strings diferentes
+    respeitando a sua posiçao na matriz original de respectivos arquivos.*/
 
     int index = L[p][k]; 
-    int index2 = L[p][k]; 
+    char lcs[index][500]; 
     int i = p; 
     int j = k; 
-    int a = p;
-    int b = k;
-    int d = p;
-    int t = k;
-    int soma = p+k;
-    int aux12 = soma;
-    char lcs_extra[soma][500];
-    char lcs[index][500];
+    int new = (p+k)-index;
+    int aux = max(p,k);
+    char lcs_dif[new][500]; //vetor diferente do primeiro arquivo
+    char lcs_dif1[new][500]; //vetor diferente do primeiro arquivo
     while (i > 0 && j > 0)
       { 
         if (strcmp(vetor[i-1],vetor2[j-1]) == 0)
           { 
-            strcpy(lcs[index-1],vetor[i-1]);
+            strcpy(lcs[i-1],vetor[i-1]);
             i--; 
-            j--; 
-            index--;  
+            j--;  
           }
         else if (L[i-1][j] > L[i][j-1])
           {
-            i--; 
-           }
+            strcpy(lcs_dif[i-1],vetor[i-1]);
+            i--; // vai copiar as linhas diferentes do primeiro arquivo para exatamente
+          }      // a mesma linha em que se encontra no arquivo original
         else
-          {
-            j--;
-          } 
-   }
-
-   while(a>2 && b>2)
-    {
-      if (strcmp(lcs[index2-1],vetor[a-1]) == 0)
-        {
-          strcpy(lcs_extra[soma-1],lcs[index2-1]);
-          soma--;
-          index2--;
-          a--;
-        }
-      else
-        {
-          strcpy(lcs_extra[soma-1],vetor[a-1]);
-          soma--;
-          index2--;
-          a--;
-          strcpy(lcs_extra[soma-1],vetor2[b-1]);
-          soma--;
-          index2--;
-          b--;
-        }  
-    }
-  /*Formatei a saida para que o cabeçalho e os dois ultimos caracteres 
-    padroes de todos os arquivos apareçam*/
-   fprintf(stderr,"%s",vetor[0]);
-    fprintf(stderr,"%s",vetor[1]);
-    for (int i=0; i < aux12-4; i++)
-      {
-        fprintf(stderr,"%s",lcs_extra[i]);
+          {   //ex: a linha 4 foi copiada para a nova matriz que ficará também na linha 4
+            strcpy(lcs_dif1[i-1],vetor2[j-1]);
+            j--;   // do mesmo modo que o algoritmo de cima porém com o segundo arquivo
+         } 
       }
-    fprintf(stderr,"%s",vetor[d-2]);
-    fprintf(stderr,"%s",vetor[d-1]);
-  }
+  
+   int pt = 0;
+   int psdb = 0;
+   int h = 2;
+    /*Impressão da matriz formatada juntamente com o LCS respeitando a ordem dos comandos*/
+   fprintf(stderr,"%s",vetor[0]); //cabeçalho
+   fprintf(stderr,"%s",vetor[1]);
+   for(int i = 2; i < aux ; i++)
+    {
+      if( i < L[p][k])
+        {     
+          fprintf(stderr," %s\n",lcs[i]);
+        }
 
+     pt = strlen(lcs_dif[i]); //se houver string na posiçao i ela faz os procedimentos
+     psdb = strlen(lcs_dif1[i]);//como a copia para as novas variaveis respeita a ordem das posiçoes
+                                // existem posiçoes i que estão vazias, por isso o len
+      if(pt > 2 && psdb > 2)
+        {
+          if (strcmp(lcs_dif[i],lcs_dif1[i]) == 0)
+            {
+              fprintf(stderr,"if(func_id == 0){\n\t%s\n}else{\n\t%s}\n", lcs_dif[i], lcs_dif1[i]);
+            }
+        }
+      if(pt > 2)
+        {
+          fprintf(stderr,"if(func_id == 0){\n\t%s}\n",lcs_dif[i]);
+        }
+     if(psdb > 2)
+      {
+          fprintf(stderr,"if(func_id == 1){\n\t%s}\n",lcs_dif1[i]); 
+      }
+    }
+    fprintf(stderr,"%s",vetor[p-2]); //rodapé
+    fprintf(stderr,"%s",vetor[p-1]);
+  }
+  
 
 //--------------- FUNÇÃO PRINCIPAL -------------------//
 
