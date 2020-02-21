@@ -1,1 +1,1 @@
-<h2>Longest Common Subsequence in C.<\h2>
+<h2>Longest Common Subsequence in C.</h2>
