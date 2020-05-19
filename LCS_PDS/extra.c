@@ -4,7 +4,7 @@
 #define MAX 300
 #include "libtp.h"
 
-/* Esse algoritmo utiliza Longest Common Subsequence (LCS) para obter um novo código a partir
+/* Esse algoritmo utiliza Longest Common Subsequence (LCS) para obter um novo código a partir de linhas diferentes e iguais
   de dois códigos distintos */
 
 /* Essa função retorna o maior valor para a matriz numerica 
@@ -149,55 +149,61 @@ int** lcs_number(char** arc_1, char** arc_2, int tam_ln_1, int tam_ln_2, int* in
             }
         }
         *ind_final = mat_int[tam_ln_1][tam_ln_2];
-    
+
     return mat_int;
   }
 
 
-/* A partir da matriz numerica, utilizamos a LCS_FORMAT para formatar todas as linhas em comum
-  a partir do valor de cada posição definido na matriz numerica, ao final disso tem-se a matriz
-  de lcs onde cada linha dessa matriz é uma linha de código comum em ambos os arquivos em sua 
-  respectiva posição de modo que não comprometa o funcionamento de modo que respeite a ordem de 
-  precedência da sua posição */
 
-  char** lcs_format(int** mat_int, int ln_1, int ln_2, char** arc_1, char** arc_2,int aux7)
+/* Essa função NÃO É UM LCS legitmo, ele vai coletar todas as linhas diferentes e iguais seguindo o padrão LCS
+  e organizar em um novo algoritmo respeitando a ordem LCS porém dando a opção de utilizar a linha de comando da 
+  primeira ou da segunda função passada no parâmetro */
+void newLcsFormat(int** mat_int, int ln_1, int ln_2, char** arc_1, char** arc_2,int aux7, char** lcs, char** lcsDif_1, char** lcsDif_2)
     {
     int index = aux7; 
-    char** lcs;
     int i = ln_1; 
     int j = ln_2; 
-    int aux8,aux9;
+    int aux8;
+    char stAuxiliar[1][4] = {"vg"};
+    int valorAuxiliarString = strlen(stAuxiliar[0]);
+   
+    for(int i = 0; i < ln_1; i++){
+        lcsDif_1[i] = (char*)calloc(3,sizeof(char));
+        strcpy(lcsDif_1[i],stAuxiliar[0]);
+        lcsDif_2[i] = (char*)calloc(3,sizeof(char));
+        strcpy(lcsDif_2[i],stAuxiliar[0]);        
+    }
 
-    lcs = (char**)calloc(ln_1,sizeof(char*));
     while (i > 0 && j > 0)
     { 
       if (strcmp(arc_1[i-1],arc_2[j-1]) == 0)
         { 
           aux8 = strlen(arc_1[i-1]);
-          lcs[index-1] = (char*)calloc(aux8+1,sizeof(char));
+          lcs[index-1] = (char*)calloc(aux8 + 1,sizeof(char));
           strcpy(lcs[index-1],arc_1[i-1]);
+
           i--; 
           j--; 
           index--;  
+    
         }
       else if (mat_int[i-1][j] > mat_int[i][j-1])
         {
-          i--; 
+
+            aux8 = strlen(arc_1[i-1]);
+            lcsDif_1[i-1] = (char*)calloc(aux8 + 1,sizeof(char));
+            strcpy(lcsDif_1[i-1],arc_1[i-1]);
+            i--; 
         }
       else
         {
-          j--;
+            aux8 = strlen(arc_2[j-1]);
+            lcsDif_2[i-1] = (char*)calloc(aux8 + 1,sizeof(char)); 
+            strcpy(lcsDif_2[i-1],arc_2[j-1]);
+            j--;
         } 
     }
-    return lcs;
  }
-
-
-/*Função generica para o ponto extra, fiz meu codigo padrão
-  que tinha desenvolvido antes de modularizar e alocar dinamicamente
-  todas as funções*/
-
-
   
 
 //--------------- FUNÇÃO PRINCIPAL -------------------//
@@ -208,36 +214,72 @@ int main(int argc, char* argv[ ])
     char** string2;
     char** matriz_char;
     int** matriz_int;
+    char** lcsDif_1;
+    char** lcsDif_2;
     ln.aux_ln1 = 0 , ln.aux_ln2 = 0, ln.index = 0; //declaração do struct
-    int ln_1 , ln_2;                              
+    int ln_1 , ln_2;                             
 
     FILE *arq1;
     FILE *arq2;
     arq1 = fopen(argv[1],"r");
     arq2 = fopen(argv[2],"r");
     
-    cont_ln(arq1, &ln_1);  //conta o numero de linhas do arquivo 1
-    cont_ln(arq2, &ln_2);  //conta o numero de linhas do arquivo 2
-    string1 = (char**)calloc(ln_1,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do primeiro arquivo
-    open_archive(arq1, &ln.aux_ln1,string1);  //apos arquivos abertos, coleto novamente numero de linhas e conteudo do mesmo
-    string2 = (char**)calloc(ln_2,sizeof(char*));  //aloca dinamicamente a quantidade de linhas do segundo arquivo
-    open_archive(arq2, &ln.aux_ln2,string2);  //apos arquivos abertos, coleto novamente numero de linhas e conteudo do mesmo
-    matriz_int = lcs_number(string1, string2, ln.aux_ln1, ln.aux_ln2, &ln.index);  //cria a matriz numerica de lcs
-    matriz_char = lcs_format(matriz_int, ln.aux_ln1, ln.aux_ln2, string1, string2, ln.index);  //cria a matriz de char lcs
-    
-    for(int i=0; i < ln.index; i++)
-      {
-        printf("%s", matriz_char[i]);  //apos gerado a matriz de char lcs, imprimimos a resposta
-      }
+    cont_ln(arq1, &ln_1); 
+    cont_ln(arq2, &ln_2);
 
-    /*Fecha os arquivos*/
+    string1 = (char**)calloc(ln_1,sizeof(char*));  
+    open_archive(arq1, &ln.aux_ln1,string1);  
+    string2 = (char**)calloc(ln_2,sizeof(char*));  
+    open_archive(arq2, &ln.aux_ln2,string2); 
+    matriz_int = lcs_number(string1, string2, ln.aux_ln1, ln.aux_ln2, &ln.index);
+    matriz_char = (char**)calloc(ln.aux_ln1,sizeof(char*));
+    lcsDif_1 = (char**)calloc(ln.aux_ln1+1,sizeof(char*));
+    lcsDif_2 = (char**)calloc(ln.aux_ln1+1,sizeof(char*));
+    newLcsFormat(matriz_int, ln.aux_ln1, ln.aux_ln2, string1, string2, ln.index, matriz_char, lcsDif_1, lcsDif_2);
+   
+    int tamanhoDif1 = 0, tamanhoDif2 = 0;
+
+    fprintf(stderr,"%s",matriz_char[0]); 
+    fprintf(stderr,"%s",matriz_char[1]);
+
+    for(int i = 2; i < ln.aux_ln1; i++)
+    {
+        if( i < ln.index)
+            {     
+                fprintf(stderr," %s",matriz_char[i]);
+            }
+
+    tamanhoDif1 = strlen(lcsDif_1[i]); 
+    tamanhoDif2 = strlen(lcsDif_2[i]);
+
+        if(tamanhoDif1 != 2 && tamanhoDif2 != 2)
+            {
+            if (strcmp(lcsDif_1[i],lcsDif_2[i]) == 0)
+                {
+                    fprintf(stderr,"if(func_id == 0){\n\t%s\n}else{\n\t%s}\n", lcsDif_1[i], lcsDif_2[i]);
+                }
+            }
+            if(tamanhoDif1 != 2)
+                {
+                    fprintf(stderr,"if(func_id == 0){\n\t%s}\n",lcsDif_1[i]);
+                }
+            if(tamanhoDif2 != 2)
+                {
+                    fprintf(stderr,"if(func_id == 1){\n\t%s}\n",lcsDif_2[i]); 
+                }
+    }
+    fprintf(stderr,"%s",matriz_char[ln.index-2]);
+    fprintf(stderr,"%s",matriz_char[ln.index-1]);
+
     fclose(arq1);
     fclose(arq2);
 
-    /* Libera todo o espaço alocado dinamicamente*/
     free_aloc_char(string1,ln.aux_ln1);
     free_aloc_char(string2,ln.aux_ln2);
-    free_aloc_int(matriz_int,ln.aux_ln1);    
-
+    free_aloc_int(matriz_int,ln.aux_ln1);  
+    free_aloc_char(lcsDif_1,ln.aux_ln1);
+    free_aloc_char(lcsDif_2,ln.aux_ln1); 
+    free_aloc_char(matriz_char,ln.aux_ln1);
+    
     return 0;
   }

@@ -13,6 +13,5 @@
     void open_archive(FILE*, int*, char**);
     void cont_ln(FILE*, int*);
     int** lcs_numerico(char**, char**, int, int, int*);
-    char** lcs_format(int**, int, int , char**, char**,int);
-    void pontoextra(FILE* arq1, FILE* arq2);
+    void newLcsFormat(int**, int , int, char**, char**, int, char**, char**,char**);
 #endif
