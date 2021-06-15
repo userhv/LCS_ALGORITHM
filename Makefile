@@ -1,5 +1,5 @@
 #
-# ©Copyright 2021 Helio Victor Flexa dos Santos - Federal University of Minas Gerais
+# Copyright 2021 Helio Victor Flexa dos Santos - Federal University of Minas Gerais
 #
 
 # c and flags
