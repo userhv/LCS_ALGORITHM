@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "libtp.h": "c",
+        "func.h": "c",
+        "function.h": "c"
+    }
+}
