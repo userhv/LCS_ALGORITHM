@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "function.h"
 
 /* Esse algoritmo utiliza Longest Common Subsequence (LCS) para obter um novo código a partir
