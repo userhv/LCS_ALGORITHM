@@ -246,16 +246,16 @@ int main(int argc, char *argv[])
     {
       if (strcmp(lcsDif_1[i], lcsDif_2[i]) == 0)
       {
-        fprintf(stderr, "if(func_id == 0){\n\t%s\n}else{\n\t%s}\n", lcsDif_1[i], lcsDif_2[i]);
+        fprintf(stderr, "%s\n%s\n", lcsDif_1[i], lcsDif_2[i]);
       }
     }
     if (tamanhoDif1 != 2)
     {
-      fprintf(stderr, "if(func_id == 0){\n\t%s}\n", lcsDif_1[i]);
+      fprintf(stderr, "%s\n", lcsDif_1[i]);
     }
     if (tamanhoDif2 != 2)
     {
-      fprintf(stderr, "if(func_id == 1){\n\t%s}\n", lcsDif_2[i]);
+      fprintf(stderr, "%s\n", lcsDif_2[i]);
     }
   }
   fprintf(stderr, "%s", matriz_char[ln.index - 2]);
